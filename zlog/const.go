@@ -7,9 +7,9 @@ package zlog
 
 // The prefix of log Name.
 const (
-	LogNameServer LogName = "server" // server 业务日志名字
+	LogNameServer LogName = "server" // 业务 业务日志名字
 	LogNameAccess         = "access" // access 日志文件名字
-	LogNameModule         = "module" // module 日志文件名
+	LogNameModule         = "module" // api 日志文件名
 	LogNameMysql          = "mysql"  // mysql 日志文件名
 	LogNameRedis          = "redis"  // redis 日志文件名
 	LogNameLua            = "lua"    // lua 日志文件名

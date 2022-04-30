@@ -38,5 +38,4 @@ const (
 const (
 	TraceHeaderKey = "requestId"
 	LogIdHeaderKey = "logId"
-	//LogIdHeaderKeyLower = "x_logId"
 )

@@ -3,6 +3,7 @@ package zlog
 import (
 	"github.com/derekAHua/goLib/consts"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
@@ -78,4 +79,8 @@ func NoLog(ctx *gin.Context) bool {
 		return true
 	}
 	return false
+}
+
+func WithTopicField(logName LogName) zap.Field {
+	return zap.String(consts.TopicType, string(logName))
 }
