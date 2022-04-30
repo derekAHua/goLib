@@ -8,7 +8,7 @@ import "github.com/derekAHua/goLib/base"
 // @Version 1.0
 
 var (
-	ParamUnValid = base.NewError(4000, "参数错误！")
+	ParamInValid = base.NewError(4000, "参数错误！")
 )
 
 // JWT Error. [1000-1100)
