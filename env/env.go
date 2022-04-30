@@ -20,26 +20,20 @@ var (
 	onceAppName sync.Once
 )
 
-func SetAppName(name string) {
-	onceAppName.Do(func() {
-		appName = name
-	})
+func init() {
+	LocalIP = utils.GetLocalIp()
+
+	gin.SetMode(gin.DebugMode) // 运行环境
 }
 
 func GetAppName() string {
 	return appName
 }
 
-func init() {
-	LocalIP = utils.GetLocalIp()
-
-	gin.SetMode(gin.DebugMode) // 运行环境
-
-	initDBSecret()
-}
-
-func SetRootPath(r string) {
-	rootPath = r
+func SetAppName(name string) {
+	onceAppName.Do(func() {
+		appName = name
+	})
 }
 
 func GetRootPath() string {
@@ -50,14 +44,18 @@ func GetRootPath() string {
 	}
 }
 
+func SetRootPath(r string) {
+	rootPath = r
+}
+
 // GetConfDirPath 返回配置文件目录绝对地址
 func GetConfDirPath() string {
-	return filepath.Join(GetRootPath(), "conf")
+	return filepath.Join(GetRootPath(), consts.ConfDir)
 }
 
 // GetLogDirPath 返回log目录的绝对地址
 func GetLogDirPath() string {
-	return filepath.Join(GetRootPath(), "log")
+	return filepath.Join(GetRootPath(), consts.LogDir)
 }
 
 func GetRunEnv() int {
