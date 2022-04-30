@@ -5,4 +5,7 @@ package consts
 // @Date: 2022/4/30 14:12
 // @Version 1.0
 
-const DefaultRootPath = "."
+const (
+	DefaultRootPath = "."
+	DefaultConf     = "yml"
+)
