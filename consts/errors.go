@@ -7,6 +7,10 @@ import "github.com/derekAHua/goLib/base"
 // @Date: 2022/4/30 11:45
 // @Version 1.0
 
+var (
+	ParamUnValid = base.NewError(4000, "参数错误！")
+)
+
 // JWT Error. [1000-1100)
 var (
 	TokenExpired     = base.NewError(1000, "Token is expired.")
