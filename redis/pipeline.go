@@ -23,7 +23,7 @@ type commands struct {
 }
 
 type Pipeline struct {
-	cmds  []commands
+	cmdS  []commands
 	err   error
 	redis *Redis
 }
@@ -42,7 +42,7 @@ func (p *Pipeline) Put(ctx *gin.Context, cmd string, args ...interface{}) error 
 		cmd:  cmd,
 		args: args,
 	}
-	p.cmds = append(p.cmds, c)
+	p.cmdS = append(p.cmdS, c)
 	return nil
 }
 
@@ -50,10 +50,10 @@ func (p *Pipeline) Exec(ctx *gin.Context) (res []interface{}, err error) {
 	start := time.Now()
 
 	conn := p.redis.pool.Get()
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
-	for i := range p.cmds {
-		err = conn.Send(p.cmds[i].cmd, p.cmds[i].args...)
+	for i := range p.cmdS {
+		err = conn.Send(p.cmdS[i].cmd, p.cmdS[i].args...)
 	}
 
 	err = conn.Flush()
@@ -62,14 +62,14 @@ func (p *Pipeline) Exec(ctx *gin.Context) (res []interface{}, err error) {
 	var ralCode int
 	if err == nil {
 		ralCode = 0
-		for i := range p.cmds {
+		for i := range p.cmdS {
 			var reply interface{}
 			reply, err = conn.Receive()
 			res = append(res, reply)
-			p.cmds[i].reply, p.cmds[i].err = reply, err
+			p.cmdS[i].reply, p.cmdS[i].err = reply, err
 		}
 
-		msg = "pipeline exec succ"
+		msg = "pipeline exec success"
 	} else {
 		ralCode = -1
 		p.err = err
@@ -78,8 +78,8 @@ func (p *Pipeline) Exec(ctx *gin.Context) (res []interface{}, err error) {
 
 	end := time.Now()
 	fields := []zlog.Field{
-		zlog.WithTopicField(zlog.LogNameModule),
-		zap.String("prot", "redis"),
+		zlog.WithTopicField(zlog.LogNameRedis),
+		zap.String("protobuf", "redis"),
 		zap.String("remoteAddr", p.redis.RemoteAddr),
 		zap.String("service", p.redis.Service),
 		zap.String("requestStartTime", utils.GetFormatRequestTime(start)),

@@ -10,8 +10,6 @@ func NewJsonEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder {
 	}
 }
 
-// Todo Rewrite functions of jsonEncoder.
-
 type jsonEncoder struct {
 	zapcore.Encoder
 }

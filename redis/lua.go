@@ -15,12 +15,12 @@ func (r *Redis) Lua(ctx *gin.Context, script string, keyCount int, keysAndArgs .
 
 	lua := redigo.NewScript(keyCount, script)
 	conn := r.pool.Get()
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	reply, err := lua.Do(conn, keysAndArgs...)
 
 	ralCode := 0
-	msg := "pipeline exec succ"
+	msg := "pipeline exec success"
 	if err != nil {
 		ralCode = -1
 		msg = "pipeline exec error: " + err.Error()
@@ -28,8 +28,8 @@ func (r *Redis) Lua(ctx *gin.Context, script string, keyCount int, keysAndArgs .
 	end := time.Now()
 
 	fields := []zlog.Field{
-		zlog.WithTopicField(zlog.LogNameModule),
-		zap.String("prot", "redis"),
+		zlog.WithTopicField(zlog.LogNameLua),
+		zap.String("protobuf", "redis"),
 		zap.String("remoteAddr", r.RemoteAddr),
 		zap.String("service", r.Service),
 		zap.String("requestStartTime", utils.GetFormatRequestTime(start)),

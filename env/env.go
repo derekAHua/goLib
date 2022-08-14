@@ -1,7 +1,6 @@
 package env
 
 import (
-	"github.com/derekAHua/goLib/consts"
 	"github.com/derekAHua/goLib/utils"
 	"github.com/gin-gonic/gin"
 	"path/filepath"
@@ -40,7 +39,7 @@ func GetRootPath() string {
 	if rootPath != "" {
 		return rootPath
 	} else {
-		return consts.DefaultRootPath
+		return DefaultRootPath
 	}
 }
 
@@ -50,12 +49,12 @@ func SetRootPath(r string) {
 
 // GetConfDirPath 返回配置文件目录绝对地址
 func GetConfDirPath() string {
-	return filepath.Join(GetRootPath(), consts.ConfDir)
+	return filepath.Join(GetRootPath(), ConfDir)
 }
 
 // GetLogDirPath 返回log目录的绝对地址
 func GetLogDirPath() string {
-	return filepath.Join(GetRootPath(), consts.LogDir)
+	return filepath.Join(GetRootPath(), LogDir)
 }
 
 func GetRunEnv() int {

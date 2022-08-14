@@ -14,7 +14,7 @@ import (
 // 日志打印Do args部分支持的最大长度
 const logForRedisValue = 50
 
-type RedisConf struct {
+type Conf struct {
 	Service         string        `yaml:"service"`
 	Addr            string        `yaml:"addr"`
 	Password        string        `yaml:"password"`
@@ -27,7 +27,7 @@ type RedisConf struct {
 	WriteTimeOut    time.Duration `yaml:"writeTimeOut"`
 }
 
-func (conf *RedisConf) checkConf() {
+func (conf *Conf) checkConf() {
 	if conf.MaxIdle == 0 {
 		conf.MaxIdle = 50
 	}
@@ -57,7 +57,7 @@ type Redis struct {
 	RemoteAddr string
 }
 
-func InitRedisClient(conf RedisConf) (*Redis, error) {
+func InitRedisClient(conf Conf) (*Redis, error) {
 	conf.checkConf()
 	p := &redigo.Pool{
 		MaxIdle:         conf.MaxIdle,
@@ -101,13 +101,13 @@ func (r *Redis) Do(ctx *gin.Context, commandName string, args ...interface{}) (r
 	conn := r.pool.Get()
 	err = conn.Err()
 	if err != nil {
-		zlog.ErrorLogger(ctx, zlog.LogNameRedis, "get connection error: "+err.Error(), zlog.WithTopicField(zlog.LogNameModule), zap.String("prot", "redis"))
+		zlog.ErrorLogger(ctx, zlog.LogNameRedis, "get connection error: "+err.Error(), zlog.WithTopicField(zlog.LogNameRedis), zap.String("protobuf", "redis"))
 		return reply, err
 	}
 
 	reply, err = conn.Do(commandName, args...)
 	if e := conn.Close(); e != nil {
-		zlog.WarnLogger(ctx, zlog.LogNameRedis, "connection close error: "+e.Error(), zlog.WithTopicField(zlog.LogNameModule), zap.String("prot", "redis"))
+		zlog.WarnLogger(ctx, zlog.LogNameRedis, "connection close error: "+e.Error(), zlog.WithTopicField(zlog.LogNameRedis), zap.String("protobuf", "redis"))
 	}
 
 	end := time.Now()
@@ -118,12 +118,12 @@ func (r *Redis) Do(ctx *gin.Context, commandName string, args ...interface{}) (r
 	if err != nil {
 		ralCode = -1
 		msg = fmt.Sprintf("redis do error: %s", err.Error())
-		zlog.ErrorLogger(ctx, zlog.LogNameRedis, msg, zlog.WithTopicField(zlog.LogNameModule), zap.String("prot", "redis"))
+		zlog.ErrorLogger(ctx, zlog.LogNameRedis, msg, zlog.WithTopicField(zlog.LogNameRedis), zap.String("protobuf", "redis"))
 	}
 
 	fields := []zlog.Field{
-		zlog.WithTopicField(zlog.LogNameModule),
-		zap.String("prot", "redis"),
+		zlog.WithTopicField(zlog.LogNameRedis),
+		zap.String("protobuf", "redis"),
 		zap.String("service", r.Service),
 		zap.String("remoteAddr", r.RemoteAddr),
 		zap.String("requestStartTime", utils.GetFormatRequestTime(start)),

@@ -3,12 +3,19 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/derekAHua/goLib/consts"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+)
+
+var (
+	TokenExpired     = errors.New("token is expired")
+	TokenNotValidYet = errors.New("token not active yet")
+	TokenMalformed   = errors.New("that's not even a token")
+	TokenInvalid     = errors.New("couldn't handle this token")
 )
 
 type (
@@ -26,7 +33,7 @@ type (
 
 func NewJWT(singKey string) *JWT {
 	return &JWT{
-		[]byte(singKey), //可以设置过期时间
+		[]byte(singKey), // 可以设置过期时间
 	}
 }
 
@@ -45,7 +52,7 @@ func (claims *CustomClaims) String() string {
 
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 我们这里jwt鉴权取头部信息 x-token 登录时回返回token信息 这里前端需要把token存储到cookie或者本地localSstorage中 不过需要跟后端协商过期时间 可以约定刷新令牌或者重新登录
+		// 我们这里jwt鉴权取头部信息 x-token 登录时回返回token信息 这里前端需要把token存储到cookie或者本地localStorage中 不过需要跟后端协商过期时间 可以约定刷新令牌或者重新登录
 		token := c.Request.Header.Get("x-token")
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
@@ -58,8 +65,8 @@ func JWTAuth() gin.HandlerFunc {
 		// parseToken 解析token包含的信息
 		claims, err := j.ParseToken(token)
 		if err != nil {
-			if err == consts.TokenExpired {
-				if err == consts.TokenExpired {
+			if err == TokenExpired {
+				if err == TokenExpired {
 					c.JSON(http.StatusUnauthorized, map[string]string{
 						"msg": "授权已过期",
 					})
@@ -90,26 +97,26 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, consts.TokenMalformed
+				return nil, TokenMalformed
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				// Token is expired
-				return nil, consts.TokenExpired
+				return nil, TokenExpired
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, consts.TokenNotValidYet
+				return nil, TokenNotValidYet
 			} else {
-				return nil, consts.TokenInvalid
+				return nil, TokenInvalid
 			}
 		}
 	}
 	if token == nil {
-		return nil, consts.TokenInvalid
+		return nil, TokenInvalid
 	}
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		return claims, nil
 	}
 
-	return nil, consts.TokenInvalid
+	return nil, TokenInvalid
 }
 
 func (j *JWT) RefreshToken(tokenString string) (string, error) {
@@ -127,5 +134,5 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
 		return j.CreateToken(*claims)
 	}
-	return "", consts.TokenInvalid
+	return "", TokenInvalid
 }

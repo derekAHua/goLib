@@ -3,7 +3,6 @@ package base
 import (
 	"context"
 	"fmt"
-	"github.com/derekAHua/goLib/consts"
 	"github.com/derekAHua/goLib/env"
 	"github.com/derekAHua/goLib/utils"
 	"github.com/derekAHua/goLib/zlog"
@@ -130,7 +129,7 @@ type ormLogger struct {
 }
 
 // LogMode log mode
-func (l *ormLogger) LogMode(level logger.LogLevel) logger.Interface {
+func (l *ormLogger) LogMode(_ logger.LogLevel) logger.Interface {
 	newLogger := *l
 	return &newLogger
 }
@@ -156,15 +155,15 @@ func (l ormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
 func (l ormLogger) commonFields(ctx context.Context) []zlog.Field {
 	var logID, requestID string
 	if c, ok := ctx.(*gin.Context); ok && c != nil {
-		logID, _ = ctx.Value(consts.ContextKeyLogId).(string)
-		requestID, _ = ctx.Value(consts.ContextKeyRequestId).(string)
+		logID, _ = ctx.Value(zlog.ContextKeyLogId).(string)
+		requestID, _ = ctx.Value(zlog.ContextKeyRequestId).(string)
 	}
 
 	fields := []zlog.Field{
 		zlog.WithTopicField(zlog.LogNameMysql),
 		zap.String("logId", logID),
 		zap.String("requestId", requestID),
-		zap.String("prot", "mysql"),
+		zap.String("protobuf", "mysql"),
 		zap.String("module", env.GetAppName()),
 		zap.String("service", l.Service),
 		zap.String("addr", l.Addr),
@@ -193,7 +192,7 @@ func (l ormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 	fields := l.commonFields(ctx)
 	fields = append(fields,
 		zap.String("sql", sql),
-		zap.Int64("affectedrow", rows),
+		zap.Int64("affectedRow", rows),
 		zap.String("requestEndTime", utils.GetFormatRequestTime(end)),
 		zap.String("requestStartTime", utils.GetFormatRequestTime(begin)),
 		zap.String("fileLine", fileLineNum),

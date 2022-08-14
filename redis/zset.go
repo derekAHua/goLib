@@ -187,8 +187,8 @@ func (r *Redis) ZRemRangeByLex(ctx *gin.Context, key, min, max string) (int64, e
 	}
 }
 
-// ZUnionStore destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
-// 计算给定的一个或多个有序集的并集，其中给定 key 的数量必须以 numkeys 参数指定，并将该并集(结果集)储存到 destination 。
+// ZUnionStore destination numKeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
+// 计算给定的一个或多个有序集的并集，其中给定 key 的数量必须以 numKeys 参数指定，并将该并集(结果集)储存到 destination 。
 func (r *Redis) ZUnionStore(ctx *gin.Context, destination string, keys []string, weights []int, aggregate string) (int64, error) {
 	args := packArgs(destination, len(keys), keys)
 	if weights != nil && len(weights) > 0 {
@@ -207,7 +207,7 @@ func (r *Redis) ZUnionStore(ctx *gin.Context, destination string, keys []string,
 	}
 }
 
-// ZInterStore 计算给定的一个或多个有序集的交集，其中给定 key 的数量必须以 numkeys 参数指定，并将该交集(结果集)储存到 destination 。
+// ZInterStore 计算给定的一个或多个有序集的交集，其中给定 key 的数量必须以 numKeys 参数指定，并将该交集(结果集)储存到 destination 。
 func (r *Redis) ZInterStore(ctx *gin.Context, destination string, keys []string, weights []int, aggregate string) (int64, error) {
 	args := packArgs(destination, len(keys), keys)
 	if weights != nil && len(weights) > 0 {

@@ -1,7 +1,6 @@
 package zlog
 
 import (
-	"github.com/derekAHua/goLib/consts"
 	"github.com/derekAHua/goLib/env"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -19,7 +18,7 @@ func sLogger(ctx *gin.Context) *zap.SugaredLogger {
 		zap.String("requestId", GetRequestId(ctx)),
 		zap.String("module", env.GetAppName()),
 		zap.String("localIp", env.GetLocalIP()),
-		zap.String("uri", ctx.GetString(consts.ContextKeyUri)),
+		zap.String("uri", ctx.GetString(ContextKeyUri)),
 	)
 }
 

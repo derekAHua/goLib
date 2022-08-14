@@ -8,11 +8,9 @@ import (
 )
 
 type (
-	LogLevel string
-
 	LogConfig struct {
-		Level  LogLevel `yaml:"level"`
-		Stdout bool     `yaml:"stdout"`
+		Level  zapcore.Level `yaml:"level"`
+		Stdout bool          `yaml:"stdout"`
 	}
 
 	loggerConfig struct {
@@ -21,11 +19,9 @@ type (
 		Stdout bool
 		Path   string
 	}
-
-	LogName string
 )
 
-// Only change by InitLog function.
+// Only change by Init function.
 var (
 	logConfig = loggerConfig{
 		ZapLevel: zapcore.InfoLevel,
@@ -33,17 +29,16 @@ var (
 		Path:     "./log",
 	}
 
-	onceLogConfig sync.Once
+	onceLogInit sync.Once
 )
 
-func InitLog(conf LogConfig) {
-	onceLogConfig.Do(func() {
-		logConfig.ZapLevel = getLogLevel(conf.Level)
+func Init(conf LogConfig) {
+	onceLogInit.Do(func() {
+		logConfig.ZapLevel = conf.Level
 		logConfig.Stdout = conf.Stdout
 		logConfig.Path = env.GetLogDirPath()
 
-		zapLogs := []LogName{LogNameServer, LogNameAccess, LogNameModule, LogNameMysql,
-			LogNameRedis, LogNameLua, LogNameRMQ, LogNameRpc}
+		zapLogs := []string{LogNameServer, LogNameAccess, LogNameMysql, LogNameRedis, LogNameLua, LogNameRMQ, LogNameRpc, LogNameES}
 
 		for _, v := range zapLogs {
 			if _, ok := mapZapLogger[v]; !ok {
@@ -51,6 +46,6 @@ func InitLog(conf LogConfig) {
 			}
 		}
 
-		sugaredLogger = mapZapLogger[LogNameModule].Sugar()
+		sugaredLogger = mapZapLogger[LogNameServer].Sugar()
 	})
 }

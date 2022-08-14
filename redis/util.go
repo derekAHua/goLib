@@ -3,7 +3,7 @@ package redis
 import (
 	"reflect"
 
-	jsoniter "github.com/json-iterator/go"
+	jsonIter "github.com/json-iterator/go"
 )
 
 func parseToString(value interface{}) string {
@@ -11,7 +11,7 @@ func parseToString(value interface{}) string {
 	case string:
 		return value.(string)
 	default:
-		b, e := jsoniter.Marshal(value)
+		b, e := jsonIter.Marshal(value)
 		if e != nil {
 			return ""
 		}

@@ -29,16 +29,16 @@ func (r *Redis) HMGet(ctx *gin.Context, key string, fields ...string) ([][]byte,
 	res := make([][]byte, 0, len(fields))
 	var resErr error
 	//2.将多个key分批获取（每次32个）
-	pageNum := int(math.Ceil(float64(len(fields)) / float64(_CHUNK_SIZE)))
+	pageNum := int(math.Ceil(float64(len(fields)) / float64(chunkSize)))
 	for i := 0; i < pageNum; i++ {
 		//2.1创建分批切片 []string
 		var end int
 		if i == (pageNum - 1) {
 			end = len(fields)
 		} else {
-			end = (i + 1) * _CHUNK_SIZE
+			end = (i + 1) * chunkSize
 		}
-		chunk := fields[i*_CHUNK_SIZE : end]
+		chunk := fields[i*chunkSize : end]
 		//2.2分批切片的类型转换 => [][]byte
 		chunkLength := len(chunk)
 		fieldList := make([]interface{}, 0, chunkLength)
@@ -60,8 +60,8 @@ func (r *Redis) HMGet(ctx *gin.Context, key string, fields ...string) ([][]byte,
 }
 
 // HMSet 将一个map存到Redis hash
-func (r *Redis) HMSet(ctx *gin.Context, key string, fvmap map[string]interface{}) error {
-	_, err := r.Do(ctx, "HMSET", redis.Args{}.Add(key).AddFlat(fvmap)...)
+func (r *Redis) HMSet(ctx *gin.Context, key string, fvMap map[string]interface{}) error {
+	_, err := r.Do(ctx, "HMSET", redis.Args{}.Add(key).AddFlat(fvMap)...)
 	return err
 }
 
@@ -89,7 +89,7 @@ func (r *Redis) HLen(ctx *gin.Context, key string) (int64, error) {
 	}
 }
 
-func (r *Redis) HVals(ctx *gin.Context, key string) ([][]byte, error) {
+func (r *Redis) HVALS(ctx *gin.Context, key string) ([][]byte, error) {
 	if res, err := redis.ByteSlices(r.Do(ctx, "HVALS", key)); err == redis.ErrNil {
 		return nil, nil
 	} else {

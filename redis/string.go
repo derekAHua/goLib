@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	_CHUNK_SIZE = 32
+	chunkSize = 32
 )
 
 func (r *Redis) Get(ctx *gin.Context, key string) ([]byte, error) {
@@ -27,16 +27,16 @@ func (r *Redis) MGet(ctx *gin.Context, keys ...string) [][]byte {
 	res := make([][]byte, 0, len(keys))
 
 	//2.将多个key分批获取（每次32个）
-	pageNum := int(math.Ceil(float64(len(keys)) / float64(_CHUNK_SIZE)))
+	pageNum := int(math.Ceil(float64(len(keys)) / float64(chunkSize)))
 	for n := 0; n < pageNum; n++ {
 		//2.1创建分批切片 []string
 		var end int
 		if n != (pageNum - 1) {
-			end = (n + 1) * _CHUNK_SIZE
+			end = (n + 1) * chunkSize
 		} else {
 			end = len(keys)
 		}
-		chunk := keys[n*_CHUNK_SIZE : end]
+		chunk := keys[n*chunkSize : end]
 		//2.2分批切片的类型转换 => []interface{}
 		chunkLength := len(chunk)
 		keyList := make([]interface{}, 0, chunkLength)

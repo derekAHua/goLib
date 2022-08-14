@@ -1,7 +1,7 @@
-package consts
+package base
 
 // @Author: Derek
-// @Description:
+// @Description: Const
 // @Date: 2022/4/30 16:01
 // @Version 1.0
 

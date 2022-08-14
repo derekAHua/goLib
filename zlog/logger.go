@@ -2,7 +2,7 @@ package zlog
 
 import (
 	"fmt"
-	"github.com/derekAHua/goLib/consts"
+	"github.com/derekAHua/goLib/utils"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +15,7 @@ import (
 type Field = zap.Field
 
 // NewLogger return a new zapLogger.
-func newLogger(name LogName) *zap.Logger {
+func newLogger(name string) *zap.Logger {
 	var (
 		infoLevel = zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= logConfig.ZapLevel && lvl <= zapcore.InfoLevel
@@ -36,45 +36,22 @@ func newLogger(name LogName) *zap.Logger {
 
 	var zapCore []zapcore.Core
 	if logConfig.Stdout {
-		c := zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, consts.LogStdout)), stdLevel)
+		c := zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, LogStdout)), stdLevel)
 		zapCore = append(zapCore, c)
 	}
 
 	zapCore = append(zapCore,
-		zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, consts.LogSuffixNormal)), infoLevel))
+		zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, LogSuffixNormal)), infoLevel))
 
 	zapCore = append(zapCore,
-		zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, consts.LogSuffixWarnFatal)), errorLevel),
+		zapcore.NewCore(getEncoder(), zapcore.AddSync(getLogWriter(name, LogSuffixWarnFatal)), errorLevel),
 	)
 
 	core := zapcore.NewTee(zapCore...)
-
 	filed := zap.Fields()
-
 	caller := zap.AddCaller()
-
 	development := zap.Development()
-
 	return zap.New(core, filed, caller, development)
-}
-
-func getLogLevel(lv LogLevel) (level zapcore.Level) {
-	str := strings.ToUpper(string(lv))
-	switch str {
-	case consts.LogLevelDebug:
-		level = zap.DebugLevel
-	case consts.LogLevelInfo:
-		level = zap.InfoLevel
-	case consts.LogLevelWarn:
-		level = zap.WarnLevel
-	case consts.LogLevelError:
-		level = zap.ErrorLevel
-	case consts.LogLevelFatal:
-		level = zap.FatalLevel
-	default:
-		level = zap.InfoLevel
-	}
-	return level
 }
 
 func getEncoder() zapcore.Encoder {
@@ -97,20 +74,18 @@ func getEncoder() zapcore.Encoder {
 	return NewJsonEncoder(encoderCfg)
 }
 
-func getLogWriter(name LogName, loggerType string) zapcore.WriteSyncer {
-	if loggerType == consts.LogStdout {
+func getLogWriter(name string, loggerType string) zapcore.WriteSyncer {
+	if loggerType == LogStdout {
 		return zapcore.AddSync(os.Stdout)
 	}
 
 	logDir := logConfig.Path
-	if _, err := os.Stat(logDir); os.IsNotExist(err) {
-		err = os.MkdirAll(logDir, 0777)
-		if err != nil {
-			panic(fmt.Errorf("create log dir '%s' error: %s", logDir, err))
-		}
+	err := utils.MakeDirIfNo(logDir)
+	if err != nil {
+		panic(fmt.Errorf("create log dir '%s' error: %s", logDir, err))
 	}
 
-	filename := filepath.Join(strings.TrimSuffix(logDir, "/"), string(name)+loggerType)
+	filename := filepath.Join(strings.TrimSuffix(logDir, "/"), name+loggerType)
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		panic("Open log file error: " + err.Error())
@@ -119,10 +94,6 @@ func getLogWriter(name LogName, loggerType string) zapcore.WriteSyncer {
 }
 
 func CloseLogger() {
-	if sugaredLogger != nil {
-		_ = sugaredLogger.Sync()
-	}
-
 	for _, logger := range mapZapLogger {
 		if logger != nil {
 			_ = logger.Sync()
