@@ -67,7 +67,7 @@ func getFields(client *gorm.DB, tableName string) (ret []field) {
 // 生成Model
 func generateModel(directory string, table table, fields []field) {
 	daoFileName := table.Name
-	structName := generator.CamelCase(daoFileName)
+	structName := generator.CamelCase(daoFileName)[3:]
 	fileName := filepath.Join(directory, daoFileName+".go")
 
 	content := "package " + path.Dir(fileName) + "\n\n"        // package

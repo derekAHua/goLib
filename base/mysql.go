@@ -172,7 +172,7 @@ func (l ormLogger) commonFields(ctx context.Context) []zlog.Field {
 	return fields
 }
 
-// Trace print sql message
+// Trace print sql message.
 func (l ormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	end := time.Now()
 	elapsed := end.Sub(begin)
