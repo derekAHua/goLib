@@ -61,7 +61,7 @@ func generateSnowflake() int64 {
 	return _node.Generate().Int64()
 }
 
-func wrapLogger(actualLogger func(*gin.Context, string, string, ...zapcore.Field), ctx *gin.Context, msg string, fields ...zapcore.Field) {
+func wrapLogger(actualLogger func(*gin.Context, zlog.LogName, string, ...zapcore.Field), ctx *gin.Context, msg string, fields ...zapcore.Field) {
 	logFields := []zapcore.Field{
 		zlog.WithTopicField(zlog.LogNameRMQ),
 	}

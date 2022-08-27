@@ -32,13 +32,14 @@ var (
 	onceLogInit sync.Once
 )
 
-func Init(conf LogConfig) {
+// Init LogName's logger.
+func Init(conf LogConfig, logNames ...LogName) {
 	onceLogInit.Do(func() {
 		logConfig.ZapLevel = conf.Level
 		logConfig.Stdout = conf.Stdout
 		logConfig.Path = env.GetLogDirPath()
 
-		zapLogs := []string{LogNameServer, LogNameAccess, LogNameMysql, LogNameRedis, LogNameLua, LogNameRMQ, LogNameRpc, LogNameES}
+		zapLogs := append([]LogName{LogNameServer, LogNameAccess}, logNames...)
 
 		for _, v := range zapLogs {
 			if _, ok := mapZapLogger[v]; !ok {

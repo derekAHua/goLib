@@ -15,7 +15,7 @@ import (
 type Field = zap.Field
 
 // NewLogger return a new zapLogger.
-func newLogger(name string) *zap.Logger {
+func newLogger(name LogName) *zap.Logger {
 	var (
 		infoLevel = zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= logConfig.ZapLevel && lvl <= zapcore.InfoLevel
@@ -74,7 +74,7 @@ func getEncoder() zapcore.Encoder {
 	return NewJsonEncoder(encoderCfg)
 }
 
-func getLogWriter(name string, loggerType string) zapcore.WriteSyncer {
+func getLogWriter(name LogName, loggerType string) zapcore.WriteSyncer {
 	if loggerType == LogStdout {
 		return zapcore.AddSync(os.Stdout)
 	}
@@ -85,7 +85,7 @@ func getLogWriter(name string, loggerType string) zapcore.WriteSyncer {
 		panic(fmt.Errorf("create log dir '%s' error: %s", logDir, err))
 	}
 
-	filename := filepath.Join(strings.TrimSuffix(logDir, "/"), name+loggerType)
+	filename := filepath.Join(strings.TrimSuffix(logDir, "/"), name.ToString()+loggerType)
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		panic("Open log file error: " + err.Error())

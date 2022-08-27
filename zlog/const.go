@@ -5,30 +5,26 @@ package zlog
 // @Date: 2022/4/30 15:36
 // @Version 1.0
 
+type LogName string
+
+func (l LogName) ToString() string {
+	return string(l)
+}
+
 // The prefix of log Name.
 const (
-	LogNameServer = "server" // server 业务日志名字
-	LogNameAccess = "access" // access 日志文件名字
-	LogNameMysql  = "mysql"  // mysql 日志文件名
-	LogNameRedis  = "redis"  // redis 日志文件名
-	LogNameLua    = "lua"    // lua 日志文件名
-	LogNameRMQ    = "rmq"    // rmq 日志文件名
-	LogNameRpc    = "rpc"    // rpc 日志文件名
-	LogNameES     = "es"     // ES 日志文件名
+	LogNameServer LogName = "server" // server 业务日志名字
+	LogNameAccess         = "access" // access 日志文件名字
+	LogNameMysql          = "mysql"  // mysql 日志文件名
+	LogNameRedis          = "redis"  // redis 日志文件名
+	LogNameLua            = "lua"    // lua 日志文件名
+	LogNameRMQ            = "rmq"    // rmq 日志文件名
+	LogNameRpc            = "rpc"    // rpc 日志文件名
+	LogNameES             = "es"     // ES 日志文件名
 )
 
 const (
 	TopicType = "_topic" // topic logo
-)
-
-// Log conf level.
-const (
-	LogLevelDefault = "INFO"
-	LogLevelDebug   = "DEBUG"
-	LogLevelInfo    = "INFO"
-	LogLevelWarn    = "WARN"
-	LogLevelError   = "ERROR"
-	LogLevelFatal   = "FATAL"
 )
 
 // Log type.

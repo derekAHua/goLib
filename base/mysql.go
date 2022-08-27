@@ -106,7 +106,7 @@ func InitMysqlClient(conf MysqlConf) (client *gorm.DB, err error) {
 	// 设置了连接可复用的最大时间
 	sqlDB.SetConnMaxLifetime(conf.ConnMaxLifeTime)
 
-	return client, nil
+	return
 }
 
 func newLogger(conf *MysqlConf) logger.Interface {
