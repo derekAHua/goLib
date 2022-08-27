@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -13,12 +14,29 @@ type (
 		Update(update interface{}, options ...Option) (rowsAffected int64, err error)
 		Count(options ...Option) (int64, error)
 		Clauses(cond ...clause.Expression) (tx *gorm.DB)
+		Upsert(data interface{}, columns []clause.Column, doUpdates clause.Set) (rowsAffected int64, err error)
 	}
 
 	defaultBaseModel struct {
 		db *gorm.DB
 	}
 )
+
+func (m *defaultBaseModel) Upsert(data interface{}, columns []clause.Column, doUpdates clause.Set) (rowsAffected int64, err error) {
+	if len(columns) == 0 {
+		return 0, errors.New("clause.Column must > 1")
+	}
+	if len(doUpdates) == 0 {
+		return 0, errors.New("clause.Set must > 1")
+	}
+
+	db := m.Clauses(clause.OnConflict{
+		Columns:   columns,
+		DoUpdates: doUpdates,
+	}).Create(data)
+
+	return db.RowsAffected, db.Error
+}
 
 func NewBaseModel(db *gorm.DB) BaseModel {
 	return &defaultBaseModel{db}

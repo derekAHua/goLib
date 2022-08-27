@@ -6,14 +6,19 @@ import (
 	"go.uber.org/zap"
 )
 
-var mapZapLogger = make(map[string]*zap.Logger)
+var mapZapLogger = make(map[LogName]*zap.Logger)
 
-func zapLogger(ctx *gin.Context, logName string) *zap.Logger {
-	m := mapZapLogger[logName]
-	if ctx == nil {
-		return m
+func zapLogger(ctx *gin.Context, logName LogName) *zap.Logger {
+	ret, ok := mapZapLogger[logName]
+	if !ok {
+		ret = mapZapLogger[LogNameServer]
 	}
-	return m.With(
+
+	if ctx == nil {
+		return ret
+	}
+
+	return ret.With(
 		zap.String("logId", GetLogId(ctx)),
 		zap.String("requestId", GetRequestId(ctx)),
 		zap.String("module", env.GetAppName()),
@@ -22,42 +27,42 @@ func zapLogger(ctx *gin.Context, logName string) *zap.Logger {
 	)
 }
 
-func DebugLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func DebugLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
 	zapLogger(ctx, logName).Debug(msg, fields...)
 }
 
-func InfoLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func InfoLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
 	zapLogger(ctx, logName).Info(msg, fields...)
 }
 
-func WarnLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func WarnLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
 	zapLogger(ctx, logName).Warn(msg, fields...)
 }
 
-func ErrorLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func ErrorLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
 	zapLogger(ctx, logName).Error(msg, fields...)
 }
 
-func PanicLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func PanicLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
 	zapLogger(ctx, logName).Panic(msg, fields...)
 }
 
-func FatalLogger(ctx *gin.Context, logName string, msg string, fields ...zap.Field) {
+func FatalLogger(ctx *gin.Context, logName LogName, msg string, fields ...zap.Field) {
 	if NoLog(ctx) {
 		return
 	}
