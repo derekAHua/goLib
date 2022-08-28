@@ -15,6 +15,9 @@ import (
 
 type Student struct {
 	StudentID uint64
+	Name      string
+	Age       uint64
+	Phone     string
 }
 
 func Test_defaultSafeErrGroup_Run(t *testing.T) {
@@ -53,26 +56,40 @@ func Test_defaultSafeErrGroup_Run(t *testing.T) {
 func getStudentMap(ctx *gin.Context, studentList []Student) (ret map[uint64]Student, err error) {
 	ret = make(map[uint64]Student, len(studentList))
 
+	ids := make([]uint64, 0, len(studentList))
+	for _, v := range studentList {
+		ids = append(ids, v.StudentID)
+	}
+
 	g := NewErrGroup(ctx)
 
-	fmt.Println("无须等待")
+	mName := make(map[uint64]string, len(ids))
 	g.Go(func() error {
 		time.Sleep(time.Millisecond * 100)
+		for _, v := range ids {
+			mName[v] = fmt.Sprintf("name_%d", v)
+		}
 		return nil
 	})
 
-	fmt.Println("无须等待2")
+	mAge := make(map[uint64]uint64, len(ids))
 	g.Go(func() error {
 		time.Sleep(time.Millisecond * 200)
+		for _, v := range ids {
+			mAge[v] = v
+		}
 		//panic("出错啦")
 		return nil
 	})
-	fmt.Println("无须等待3")
+
+	mPhone := make(map[uint64]string, len(ids))
 	g.Go(func() error {
 		time.Sleep(time.Millisecond * 300)
+		for _, v := range ids {
+			mPhone[v] = fmt.Sprintf("phone_%d", v)
+		}
 		return nil
 	})
-	fmt.Println("无须等待3")
 
 	g.Run(studentList,
 		func(item interface{}) (ret interface{}, err error) { // 入参item
@@ -81,12 +98,20 @@ func getStudentMap(ctx *gin.Context, studentList []Student) (ret map[uint64]Stud
 		}, func(result interface{}) {
 			stu := result.(Student)
 			ret[stu.StudentID] = stu
-		}, //WithWorkers(3),
+		}, // WithWorkers(3),
 	)
 
 	err = g.Error()
 	if err != nil {
 		return
+	}
+
+	for _, v := range ret {
+		v.Age = mAge[v.StudentID]
+		v.Name = mName[v.StudentID]
+		v.Phone = mPhone[v.StudentID]
+
+		ret[v.StudentID] = v
 	}
 
 	return
